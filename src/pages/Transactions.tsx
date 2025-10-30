@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +25,10 @@ const TransactionsPage = () => {
     { id: 6, materialId: 4, materialName: 'Саморез 4x50', type: 'outgoing', quantity: 620, timestamp: new Date('2025-10-30 08:30') },
     { id: 7, materialId: 5, materialName: 'Винт М6', type: 'incoming', quantity: 800, timestamp: new Date('2025-10-30 10:00') },
     { id: 8, materialId: 3, materialName: 'Шайба М8', type: 'outgoing', quantity: 500, timestamp: new Date('2025-10-30 13:25') },
+    { id: 9, materialId: 6, materialName: 'Шпилька М12', type: 'incoming', quantity: 300, timestamp: new Date('2025-10-30 15:00') },
+    { id: 10, materialId: 7, materialName: 'Дюбель 8x40', type: 'incoming', quantity: 1500, timestamp: new Date('2025-10-30 16:20') },
+    { id: 11, materialId: 4, materialName: 'Саморез 4x50', type: 'outgoing', quantity: 200, timestamp: new Date('2025-10-30 17:10') },
+    { id: 12, materialId: 8, materialName: 'Анкер М10', type: 'incoming', quantity: 100, timestamp: new Date('2025-10-30 18:00') },
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,12 +44,8 @@ const TransactionsPage = () => {
     return type === 'incoming' ? 'Поступление' : 'Списание';
   };
 
-  const getTypeIcon = (type: Transaction['type']) => {
-    return type === 'incoming' ? 'ArrowDownCircle' : 'ArrowUpCircle';
-  };
-
   const getTypeColor = (type: Transaction['type']) => {
-    return type === 'incoming' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+    return type === 'incoming' ? 'bg-green-500' : 'bg-red-500';
   };
 
   const totalIncoming = transactions.filter((t) => t.type === 'incoming').reduce((sum, t) => sum + t.quantity, 0);
@@ -112,41 +113,39 @@ const TransactionsPage = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>История операций</CardTitle>
-          <CardDescription>Все операции с материалами в хронологическом порядке</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {filteredTransactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between p-4 rounded-lg border hover:shadow-sm transition-all duration-200"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-full ${getTypeColor(transaction.type)}`}>
-                    <Icon name={getTypeIcon(transaction.type)} size={20} />
-                  </div>
-                  <div>
-                    <p className="font-medium">{transaction.materialName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {transaction.timestamp.toLocaleDateString('ru-RU')} в {transaction.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-semibold">
-                      {transaction.type === 'incoming' ? '+' : '-'}{transaction.quantity} шт
-                    </p>
-                    <Badge variant="outline" className="text-xs">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[60px]">ID</TableHead>
+                <TableHead>Материал</TableHead>
+                <TableHead className="text-center">Тип операции</TableHead>
+                <TableHead className="text-right">Количество</TableHead>
+                <TableHead>Дата и время</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredTransactions.map((transaction) => (
+                <TableRow key={transaction.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">#{transaction.id}</TableCell>
+                  <TableCell className="font-medium">{transaction.materialName}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge className={`${getTypeColor(transaction.type)} text-white`}>
                       {getTypeLabel(transaction.type)}
                     </Badge>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    <span className={transaction.type === 'incoming' ? 'text-green-600' : 'text-red-600'}>
+                      {transaction.type === 'incoming' ? '+' : '-'}{transaction.quantity} шт
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {transaction.timestamp.toLocaleDateString('ru-RU')} {transaction.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

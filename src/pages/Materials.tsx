@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -25,6 +26,9 @@ const MaterialsPage = () => {
     { id: 3, name: 'Шайба М8', description: 'Шайба плоская оцинкованная', amount: 1.2, stock: 2500, minStock: 1000 },
     { id: 4, name: 'Саморез 4x50', description: 'Саморез по дереву, оцинкованный', amount: 0.8, stock: 180, minStock: 400 },
     { id: 5, name: 'Винт М6', description: 'Винт с потайной головкой', amount: 3.5, stock: 800, minStock: 300 },
+    { id: 6, name: 'Шпилька М12', description: 'Шпилька резьбовая оцинкованная', amount: 8.0, stock: 450, minStock: 200 },
+    { id: 7, name: 'Дюбель 8x40', description: 'Дюбель пластиковый универсальный', amount: 1.5, stock: 3000, minStock: 1500 },
+    { id: 8, name: 'Анкер М10', description: 'Анкер клиновой оцинкованный', amount: 12.0, stock: 150, minStock: 100 },
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -151,51 +155,52 @@ const MaterialsPage = () => {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {materials.map((material) => {
-          const status = getStockStatus(material.stock, material.minStock);
-          return (
-            <Card key={material.id} className="hover:shadow-lg transition-all duration-200 hover-scale">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl">{material.name}</CardTitle>
-                    <CardDescription className="mt-1">{material.description}</CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteMaterial(material.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Icon name="Trash2" size={18} />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Цена за единицу</span>
-                    <span className="font-semibold">{material.amount.toFixed(2)} ₽</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Остаток</span>
-                    <span className="font-semibold">{material.stock} шт</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Мин. остаток</span>
-                    <span className="font-semibold">{material.minStock} шт</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Статус</span>
-                    <Badge className={`${status.color} text-white`}>{status.label}</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">ID</TableHead>
+                <TableHead>Название</TableHead>
+                <TableHead>Описание</TableHead>
+                <TableHead className="text-right">Цена, ₽</TableHead>
+                <TableHead className="text-right">Остаток</TableHead>
+                <TableHead className="text-right">Мин. остаток</TableHead>
+                <TableHead className="text-center">Статус</TableHead>
+                <TableHead className="w-[80px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {materials.map((material) => {
+                const status = getStockStatus(material.stock, material.minStock);
+                return (
+                  <TableRow key={material.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{material.id}</TableCell>
+                    <TableCell className="font-medium">{material.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{material.description}</TableCell>
+                    <TableCell className="text-right">{material.amount.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{material.stock} шт</TableCell>
+                    <TableCell className="text-right">{material.minStock} шт</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className={`${status.color} text-white`}>{status.label}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteMaterial(material.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Icon name="Trash2" size={18} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

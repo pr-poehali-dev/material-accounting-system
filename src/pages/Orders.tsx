@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -26,7 +27,10 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([
     { id: 1, materialId: 1, materialName: 'Гайка М8', quantity: 1000, customer: 'ООО "Монтаж"', amount: 2500, status: 'completed', timestamp: new Date('2025-10-28'), isAuto: false },
     { id: 2, materialId: 2, materialName: 'Болт М10', quantity: 500, customer: 'ИП Петров', amount: 2500, status: 'processing', timestamp: new Date('2025-10-29'), isAuto: false },
-    { id: 3, materialId: 4, materialName: 'Саморез 4x50', quantity: 800, customer: 'ООО "СтройКомплект"', amount: 640, status: 'pending', timestamp: new Date('2025-10-30'), isAuto: true },
+    { id: 3, materialId: 3, materialName: 'Шайба М8', quantity: 2000, customer: 'ООО "ТехСтрой"', amount: 2400, status: 'completed', timestamp: new Date('2025-10-27'), isAuto: false },
+    { id: 4, materialId: 5, materialName: 'Винт М6', quantity: 600, customer: 'ИП Сидоров', amount: 2100, status: 'pending', timestamp: new Date('2025-10-30'), isAuto: false },
+    { id: 5, materialId: 4, materialName: 'Саморез 4x50', quantity: 800, customer: 'Автозаказ', amount: 640, status: 'pending', timestamp: new Date('2025-10-30'), isAuto: true },
+    { id: 6, materialId: 2, materialName: 'Болт М10', quantity: 400, customer: 'Автозаказ', amount: 2000, status: 'processing', timestamp: new Date('2025-10-29'), isAuto: true },
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -93,6 +97,41 @@ const OrdersPage = () => {
 
   const manualOrders = orders.filter((o) => !o.isAuto);
   const autoOrders = orders.filter((o) => o.isAuto);
+
+  const OrderTable = ({ ordersList }: { ordersList: Order[] }) => (
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[60px]">ID</TableHead>
+              <TableHead>Материал</TableHead>
+              <TableHead className="text-right">Количество</TableHead>
+              <TableHead>Заказчик</TableHead>
+              <TableHead className="text-right">Сумма, ₽</TableHead>
+              <TableHead>Дата</TableHead>
+              <TableHead className="text-center">Статус</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ordersList.map((order) => (
+              <TableRow key={order.id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">#{order.id}</TableCell>
+                <TableCell className="font-medium">{order.materialName}</TableCell>
+                <TableCell className="text-right">{order.quantity} шт</TableCell>
+                <TableCell>{order.customer}</TableCell>
+                <TableCell className="text-right font-medium">{order.amount.toFixed(2)}</TableCell>
+                <TableCell className="text-muted-foreground">{order.timestamp.toLocaleDateString('ru-RU')}</TableCell>
+                <TableCell className="text-center">
+                  <Badge className={`${getStatusColor(order.status)} text-white`}>{getStatusLabel(order.status)}</Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -182,41 +221,7 @@ const OrdersPage = () => {
         </TabsList>
 
         <TabsContent value="manual" className="mt-6">
-          <div className="grid gap-4">
-            {manualOrders.map((order) => (
-              <Card key={order.id} className="hover:shadow-md transition-all duration-200">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">Заказ #{order.id}</CardTitle>
-                      <CardDescription>{order.timestamp.toLocaleDateString('ru-RU')}</CardDescription>
-                    </div>
-                    <Badge className={`${getStatusColor(order.status)} text-white`}>{getStatusLabel(order.status)}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Материал</p>
-                      <p className="font-medium">{order.materialName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Количество</p>
-                      <p className="font-medium">{order.quantity} шт</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Заказчик</p>
-                      <p className="font-medium">{order.customer}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Сумма</p>
-                      <p className="font-medium text-primary">{order.amount.toFixed(2)} ₽</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <OrderTable ordersList={manualOrders} />
         </TabsContent>
 
         <TabsContent value="auto" className="mt-6">
@@ -227,44 +232,7 @@ const OrdersPage = () => {
               <p className="text-blue-700 mt-1">Формируются автоматически при достижении минимального уровня запасов</p>
             </div>
           </div>
-          <div className="grid gap-4">
-            {autoOrders.map((order) => (
-              <Card key={order.id} className="border-l-4 border-l-primary">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <Icon name="Zap" size={18} className="text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Заказ #{order.id}</CardTitle>
-                        <CardDescription>{order.timestamp.toLocaleDateString('ru-RU')}</CardDescription>
-                      </div>
-                    </div>
-                    <Badge className={`${getStatusColor(order.status)} text-white`}>{getStatusLabel(order.status)}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Материал</p>
-                      <p className="font-medium">{order.materialName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Количество</p>
-                      <p className="font-medium">{order.quantity} шт</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Заказчик</p>
-                      <p className="font-medium">{order.customer}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Сумма</p>
-                      <p className="font-medium text-primary">{order.amount.toFixed(2)} ₽</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <OrderTable ordersList={autoOrders} />
         </TabsContent>
       </Tabs>
     </div>
